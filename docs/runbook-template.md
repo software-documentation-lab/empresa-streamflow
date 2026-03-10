@@ -79,3 +79,17 @@
 - Dependências críticas:
 - Pontos sem cobertura:
 - Melhorias futuras:
+
+
+## Anexos e Referências
+- Painéis de monitoramento e alertas:
+- Comandos/scripts operacionais de apoio:
+- Canal/ticket de incidentes relacionados:
+- Links de PRs/issues relacionados:
+
+## Checklist de Qualidade (pré-entrega)
+- [ ] Critérios de acionamento e severidade definidos.
+- [ ] Diagnóstico inicial e mitigação passo a passo claros.
+- [ ] Escalonamento e comunicação descritos.
+- [ ] Rollback e validação pós-recuperação documentados.
+- [ ] Premissas, lacunas e riscos preenchidos.
