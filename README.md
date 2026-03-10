@@ -14,3 +14,17 @@ Produzir um runbook operacional padronizado para resposta a incidentes, diagnós
 2. Trabalhe exclusivamente no fork do grupo.
 3. Preencha a documentação na pasta `docs/`, usando `docs/runbook-template.md` como referência e consolidando o resultado em `docs/runbook.md`.
 4. Entregue o link do fork do grupo conforme orientação da disciplina.
+
+## Ferramentas recomendadas
+- Estruturação de procedimentos: Markdown com checklist no VS Code.
+- Fluxos de resposta a incidente: draw.io ou Mermaid.
+- Registro de timeline e comunicação: planilha, Notion ou equivalente.
+
+## Uso responsável de IA
+- IA pode ajudar a padronizar linguagem operacional e sequenciamento de passos.
+- Valide critérios de severidade e escalonamento com o cenário de `src/`.
+- Não definir ações críticas sem deixar claro premissas e restrições.
+
+## Entregável esperado com apoio das ferramentas
+- Documento final `docs/runbook.md` aplicável em operação real simulada.
+- Cenários de incidente com ações, escalonamento e riscos bem definidos.
