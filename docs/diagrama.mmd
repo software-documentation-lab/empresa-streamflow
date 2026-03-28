@@ -1,0 +1,133 @@
+flowchart TD
+    A["Alerta recebido pelo Analista de Plantão"] --> B["Executar pré-checagens operacionais"]
+
+    B --> B1["Verificar monitoramento: erros, latência, saturação, tráfego, backlog e health checks"]
+    B --> B2["Validar dependências: banco, cache, broker, autenticação, APIs internas e CDN"]
+    B --> B3["Conferir incidentes correlacionados: incidentes abertos, mudanças e manutenções"]
+
+    B1 --> C{"Impacto confirmado?"}
+    B2 --> C
+    B3 --> C
+
+    C -- "Não" --> Z["Falso positivo ou monitoramento contínuo"]
+    C -- "Sim" --> D["Classificar severidade"]
+
+    D --> D1["SEV1: impacto crítico - SLA imediato"]
+    D --> D2["SEV2: degradação alta - SLA até 10 min"]
+    D --> D3["SEV3: impacto moderado - SLA até 30 min"]
+    D --> D4["SEV4: baixo impacto - SLA até 4h"]
+
+    D1 --> E["Registrar incidente no canal oficial com timestamp, severidade, escopo, hipótese e ações"]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+
+    E --> F{"Qual cenário do incidente?"}
+
+    F --> G["5.1 Pico de erro 5xx no catálogo"]
+    F --> H["5.2 Atraso no processamento de eventos"]
+    F --> I["5.3 Falha intermitente na integração com CDN"]
+
+    %% Cenário 5.1
+    G --> G1["Confirmar escopo do impacto"]
+    G1 --> G2["Verificar deploy, alteração de configuração, feature flag ou pico de tráfego"]
+    G2 --> G3["Analisar CPU, memória, conexões, pool, banco e cache"]
+    G3 --> G4["Inspecionar logs e classificar o 5xx predominante"]
+    G4 --> G5["Validar health check do serviço e banco"]
+    G5 --> G6["Confirmar correlação com lançamento, campanha ou evento ao vivo"]
+    G6 --> G7["Capturar logs antes de qualquer ação destrutiva"]
+    G7 --> G8{"Causa provável identificada?"}
+
+    G8 -- "Saturação" --> G9["Escalar horizontalmente serviço de catálogo e dependências"]
+    G8 -- "Deploy ou configuração recente" --> G10["Interromper mudança e iniciar rollback"]
+    G8 -- "Feature recém-lançada" --> G11["Desabilitar feature flag"]
+    G8 -- "Travamento ou vazamento comprovado" --> G12["Reiniciar instâncias somente após coleta de evidências"]
+    G8 -- "Não identificada" --> G13["Escalonar para Plataforma/SRE"]
+
+    %% Cenário 5.2
+    H --> H1["Confirmar se o atraso é crescente, estável ou em recuperação"]
+    H1 --> H2["Verificar backlog, throughput, taxa de erro e tempo de processamento"]
+    H2 --> H3["Validar broker, fila, stream, consumidores, workers e storage"]
+    H3 --> H4["Identificar jobs, deploys, schemas, feature flags ou carga extraordinária"]
+    H4 --> H5["Confirmar impacto no negócio"]
+    H5 --> H6{"Causa provável identificada?"}
+
+    H6 -- "Gargalo operacional" --> H7["Escalar consumidores e workers"]
+    H6 -- "Priorização necessária" --> H8["Pausar cargas não essenciais"]
+    H6 -- "Falha em versão recente" --> H9["Executar rollback da versão estável"]
+    H6 -- "Reprocessamento viável" --> H10["Reprocessar após validar idempotência, ordem e duplicidade"]
+    H6 -- "Dependência crítica" --> H11["Escalonar para Plataforma/SRE, suporte e gestão se SEV1"]
+
+    %% Cenário 5.3
+    I --> I1["Confirmar se a falha é global, regional ou por tipo de conteúdo"]
+    I1 --> I2["Verificar logs, códigos de erro, latência e timeouts"]
+    I2 --> I3["Consultar status do provedor"]
+    I3 --> I4["Validar credenciais, certificados, DNS, conectividade e quota"]
+    I4 --> I5["Identificar mudança recente de configuração"]
+    I5 --> I6["Verificar provedor secundário, fallback ou contingência"]
+    I6 --> I7{"Mitigação disponível?"}
+
+    I7 -- "Sim" --> I8["Acionar fallback ou rota/provedor alternativo"]
+    I7 -- "Configuração recente" --> I9["Executar rollback controlado da configuração"]
+    I7 -- "Pressão operacional" --> I10["Reduzir operações não essenciais na integração"]
+    I7 -- "Não" --> I11["Acionar fornecedor/CDN com evidências mínimas"]
+
+    %% Convergência
+    G9 --> J["Validar estabilização"]
+    G10 --> J
+    G11 --> J
+    G12 --> J
+    G13 --> J
+    H7 --> J
+    H8 --> J
+    H9 --> J
+    H10 --> J
+    H11 --> J
+    I8 --> J
+    I9 --> J
+    I10 --> J
+    I11 --> J
+
+    J --> K{"Incidente estabilizado?"}
+
+    K -- "Não" --> L{"Existe correlação com deploy, configuração ou feature flag recente?"}
+    L -- "Sim" --> M["Executar rollback controlado"]
+    L -- "Não" --> N["Escalonar e manter contenção"]
+
+    M --> O["Monitorar indicadores críticos por pelo menos 15 min"]
+    N --> P["Atualizar canal interno com escopo, hipótese e ações"]
+    K -- "Sim" --> O
+
+    O --> Q{"Houve impacto ao usuário por mais de 15 min ou SEV1/SEV2?"}
+    P --> Q
+
+    Q -- "Sim" --> R["Acionar suporte e status page com comunicação ativa a cada 15 min"]
+    Q -- "Não" --> S["Manter comunicação interna e acompanhamento"]
+
+    R --> T["Validar pós-recuperação"]
+    S --> T
+
+    T --> T1["Taxa de erro normalizada"]
+    T --> T2["Latência dentro do padrão operacional"]
+    T --> T3["Backlog estabilizado ou em redução"]
+    T --> T4["Health checks aprovados"]
+    T --> T5["Suporte validou redução dos sintomas reportados"]
+
+    T1 --> U["Encerrar incidente"]
+    T2 --> U
+    T3 --> U
+    T4 --> U
+    T5 --> U
+
+    U --> V["Executar pós-incidente"]
+    V --> V1["Registrar identificação, datas, severidade, impacto e timeline"]
+    V --> V2["Registrar causa provável ou causa raiz"]
+    V --> V3["Registrar mitigação, rollback e responsáveis"]
+    V --> V4["Registrar lições aprendidas e ações preventivas"]
+    V --> V5["Revisar e complementar o runbook"]
+
+    V1 --> W["Fim"]
+    V2 --> W
+    V3 --> W
+    V4 --> W
+    V5 --> W
